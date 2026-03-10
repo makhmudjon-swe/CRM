@@ -1,0 +1,94 @@
+@using InventoryManagementService.Application.DTOs
+@{
+    ViewData["Title"] = "Search";
+    var query = ViewBag.Query as string ?? "";
+    var inventories = ViewBag.Inventories as IEnumerable<InventoryDto> ?? Enumerable.Empty<InventoryDto>();
+    var items = ViewBag.Items as IEnumerable<ItemDto> ?? Enumerable.Empty<ItemDto>();
+}
+
+<div class="page-header">
+    <div>
+        <h2 class="page-title"><i class="bi bi-search me-2"></i>Search Results</h2>
+        @if (!string.IsNullOrEmpty(query))
+        {
+            <p class="page-subtitle">Results for "<strong>@query</strong>"</p>
+        }
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-4" role="tablist">
+    <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#inventoriesTab">
+            <i class="bi bi-collection me-1"></i> Inventories (@inventories.Count())
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#itemsTab">
+            <i class="bi bi-list-ul me-1"></i> Items (@items.Count())
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="inventoriesTab">
+        @if (inventories.Any())
+        {
+            <div class="table-container">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr><th>Name</th><th>Category</th><th>Owner</th><th>Items</th></tr>
+                    </thead>
+                    <tbody class="stagger-in">
+                        @foreach (var inv in inventories)
+                        {
+                            <tr class="cursor-pointer" onclick="window.location='@Url.Action("Details", "Inventory", new { id = inv.Id })'">
+                                <td><strong>@inv.Name</strong></td>
+                                <td><i class="bi bi-folder2 me-1 text-muted"></i>@inv.CategoryName</td>
+                                <td>@inv.OwnerName</td>
+                                <td><span class="badge badge-soft-info">@inv.ItemCount</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="bi bi-search"></i>
+                <h5>No inventories found</h5>
+                <p>Try a different search term.</p>
+            </div>
+        }
+    </div>
+    <div class="tab-pane fade" id="itemsTab">
+        @if (items.Any())
+        {
+            <div class="table-container">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr><th>Name</th><th>Custom ID</th><th>Likes</th></tr>
+                    </thead>
+                    <tbody class="stagger-in">
+                        @foreach (var item in items)
+                        {
+                            <tr class="cursor-pointer" onclick="window.location='@Url.Action("Details", "Item", new { id = item.Id })'">
+                                <td><strong>@item.Name</strong></td>
+                                <td><code>@item.CustomId</code></td>
+                                <td><span class="badge badge-soft-danger"><i class="bi bi-heart-fill me-1"></i>@item.LikeCount</span></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="bi bi-search"></i>
+                <h5>No items found</h5>
+                <p>Try a different search term.</p>
+            </div>
+        }
+    </div>
+</div>

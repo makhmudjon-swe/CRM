@@ -1,0 +1,117 @@
+@using InventoryManagementService.Application.DTOs
+@model IEnumerable<InventoryDto>
+@{
+    ViewData["Title"] = "Inventories";
+    var isAdmin = User.IsInRole("Admin");
+    var isCreator = User.IsInRole("Creator");
+    var showOwner = isAdmin || isCreator;
+    var canCreate = (bool)(ViewBag.CanCreate ?? false);
+    var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+}
+
+<div class="page-header">
+    <div>
+        <h2 class="page-title">
+            <i class="bi bi-collection me-2"></i>
+            @if (showOwner)
+            {
+                @:All Inventories
+            }
+            else
+            {
+                @:My Inventories
+            }
+        </h2>
+    </div>
+    @if (canCreate)
+    {
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Create New
+        </a>
+    }
+</div>
+
+@if (Model.Any())
+{
+    <div class="table-container">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    @if (showOwner)
+                    {
+                        <th>Owner</th>
+                    }
+                    else
+                    {
+                        <th>Access</th>
+                    }
+                    <th>Items</th>
+                    <th>Tags</th>
+                    <th>Updated</th>
+                </tr>
+            </thead>
+            <tbody class="stagger-in">
+                @foreach (var inv in Model)
+                {
+                    <tr class="cursor-pointer" onclick="window.location='@Url.Action("Details", new { id = inv.Id })'">
+                        <td>
+                            <strong>@inv.Name</strong>
+                            @if (inv.IsPublic)
+                            {
+                                <span class="badge badge-soft-success ms-1">Public</span>
+                            }
+                        </td>
+                        <td><i class="bi bi-folder2 me-1 text-muted"></i>@inv.CategoryName</td>
+                        @if (showOwner)
+                        {
+                            <td>
+                                <span class="fw-semibold">@inv.OwnerName</span>
+                            </td>
+                        }
+                        else
+                        {
+                            <td>
+                                @if (inv.OwnerId == userId)
+                                {
+                                    <span class="badge badge-soft-primary">Owner</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-soft-info">Shared</span>
+                                }
+                            </td>
+                        }
+                        <td><span class="badge badge-soft-info">@inv.ItemCount</span></td>
+                        <td>
+                            @foreach (var tag in inv.Tags)
+                            {
+                                <span class="badge badge-soft-secondary me-1">@tag</span>
+                            }
+                        </td>
+                        <td class="text-muted">@inv.UpdatedAt.ToString("MMM dd, yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <i class="bi bi-collection"></i>
+        <h5>No inventories yet</h5>
+        @if (canCreate)
+        {
+            <p>Get started by creating your first inventory.</p>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i> Create Inventory
+            </a>
+        }
+        else
+        {
+            <p>No inventories have been shared with you yet. Contact an admin to get access.</p>
+        }
+    </div>
+}

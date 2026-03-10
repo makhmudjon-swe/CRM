@@ -1,0 +1,151 @@
+@using InventoryManagementService.Application.DTOs
+@{
+    ViewData["Title"] = "Home";
+    var latest = ViewBag.LatestInventories as IEnumerable<InventoryDto> ?? Enumerable.Empty<InventoryDto>();
+    var popular = ViewBag.TopPopular as IEnumerable<InventoryDto> ?? Enumerable.Empty<InventoryDto>();
+    var tags = ViewBag.TagCloud as IEnumerable<TagDto> ?? Enumerable.Empty<TagDto>();
+}
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
+            <div class="stat-number">@latest.Count()</div>
+            <div class="stat-label">Latest Inventories</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-star"></i></div>
+            <div class="stat-number">@popular.Count()</div>
+            <div class="stat-label">Popular</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-tags"></i></div>
+            <div class="stat-number">@tags.Count()</div>
+            <div class="stat-label">Tags</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="bi bi-collection"></i></div>
+            <div class="stat-number">@(latest.Any() ? latest.Sum(i => i.ItemCount) : 0)</div>
+            <div class="stat-label">Total Items</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="page-header">
+            <h2 class="page-title"><i class="bi bi-clock-history me-2"></i>Latest Inventories</h2>
+        </div>
+        @if (latest.Any())
+        {
+            <div class="table-container">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th>Owner</th>
+                            <th>Items</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody class="stagger-in">
+                        @foreach (var inv in latest)
+                        {
+                            <tr class="cursor-pointer" onclick="window.location='@Url.Action("Details", "Inventory", new { id = inv.Id })'">
+                                <td>
+                                    <strong>@inv.Name</strong>
+                                    @if (inv.Tags.Any())
+                                    {
+                                        <div class="mt-1">
+                                            @foreach (var tag in inv.Tags)
+                                            {
+                                                <span class="badge badge-soft-secondary me-1">@tag</span>
+                                            }
+                                        </div>
+                                    }
+                                </td>
+                                <td><i class="bi bi-folder2 me-1 text-muted"></i>@inv.CategoryName</td>
+                                <td>@inv.OwnerName</td>
+                                <td><span class="badge badge-soft-info">@inv.ItemCount</span></td>
+                                <td class="text-muted">@inv.CreatedAt.ToString("MMM dd, yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <i class="bi bi-collection"></i>
+                <h5>No inventories yet</h5>
+                @if (User.IsInRole("Admin") || User.IsInRole("Creator"))
+                {
+                    <p>Get started by creating your first inventory.</p>
+                    <a asp-controller="Inventory" asp-action="Create" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i> Create Inventory
+                    </a>
+                }
+                else
+                {
+                    <p>No inventories have been shared with you yet.</p>
+                }
+            </div>
+        }
+    </div>
+    <div class="col-lg-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="bi bi-trophy me-1"></i> Top 5 Popular
+            </div>
+            <ul class="list-group list-group-flush stagger-in">
+                @{ var rank = 1; }
+                @foreach (var inv in popular)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge badge-soft-primary">@rank</span>
+                            <a asp-controller="Inventory" asp-action="Details" asp-route-id="@inv.Id">@inv.Name</a>
+                        </div>
+                        <span class="badge badge-soft-info">@inv.ItemCount items</span>
+                    </li>
+                    rank++;
+                }
+                @if (!popular.Any())
+                {
+                    <li class="list-group-item text-muted">No inventories yet</li>
+                }
+            </ul>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-tags me-1"></i> Tag Cloud
+            </div>
+            <div class="card-body tag-cloud">
+                @if (tags.Any())
+                {
+                    @foreach (var tag in tags)
+                    {
+                        var size = Math.Min(1.5, 0.8 + tag.UsageCount * 0.1);
+                        <a asp-controller="Search" asp-action="Index" asp-route-q="@tag.Name"
+                           class="d-inline-block me-1 mb-1 badge badge-soft-secondary text-decoration-none"
+                           style="font-size: @(size)rem;">
+                            @tag.Name
+                        </a>
+                    }
+                }
+                else
+                {
+                    <span class="text-muted">No tags yet</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,183 @@
+@using InventoryManagementService.Application.DTOs
+@model ItemDto
+@{
+    var inventory = ViewBag.Inventory as InventoryDto;
+    ViewData["Title"] = Model.Name;
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var canEdit = (bool)(ViewBag.CanWriteItems ?? false);
+}
+
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Inventory" asp-action="Index">Inventories</a></li>
+        <li class="breadcrumb-item"><a asp-controller="Inventory" asp-action="Details" asp-route-id="@inventory?.Id">@inventory?.Name</a></li>
+        <li class="breadcrumb-item active">@Model.Name</li>
+    </ol>
+</nav>
+
+<div class="page-header">
+    <div>
+        <h2 class="page-title">@Model.Name</h2>
+        @if (!string.IsNullOrEmpty(Model.CustomId))
+        {
+            <p class="page-subtitle">ID: <code>@Model.CustomId</code></p>
+        }
+    </div>
+    @if (canEdit)
+    {
+        <div class="action-buttons">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-ghost btn-sm">
+                <i class="bi bi-pencil me-1"></i> Edit
+            </a>
+            <form asp-action="Delete" method="post" class="d-inline"
+                  onsubmit="return confirm('Delete this item?')">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <input type="hidden" name="inventoryId" value="@Model.InventoryId" />
+                <button type="submit" class="btn btn-ghost-danger btn-sm">
+                    <i class="bi bi-trash me-1"></i> Delete
+                </button>
+            </form>
+        </div>
+    }
+</div>
+
+<div class="row g-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header"><i class="bi bi-list-columns me-1"></i> Fields</div>
+            <div class="card-body">
+                <table class="table table-borderless mb-0">
+                    @if (inventory?.CustomString1Enabled == true) {
+                        <tr><th>@inventory.CustomString1Name</th><td>@Model.CustomString1Value</td></tr>
+                    }
+                    @if (inventory?.CustomString2Enabled == true) {
+                        <tr><th>@inventory.CustomString2Name</th><td>@Model.CustomString2Value</td></tr>
+                    }
+                    @if (inventory?.CustomString3Enabled == true) {
+                        <tr><th>@inventory.CustomString3Name</th><td>@Model.CustomString3Value</td></tr>
+                    }
+                    @if (inventory?.CustomText1Enabled == true) {
+                        <tr><th>@inventory.CustomText1Name</th><td><pre class="mb-0">@Model.CustomText1Value</pre></td></tr>
+                    }
+                    @if (inventory?.CustomText2Enabled == true) {
+                        <tr><th>@inventory.CustomText2Name</th><td><pre class="mb-0">@Model.CustomText2Value</pre></td></tr>
+                    }
+                    @if (inventory?.CustomText3Enabled == true) {
+                        <tr><th>@inventory.CustomText3Name</th><td><pre class="mb-0">@Model.CustomText3Value</pre></td></tr>
+                    }
+                    @if (inventory?.CustomInt1Enabled == true) {
+                        <tr><th>@inventory.CustomInt1Name</th><td>@Model.CustomInt1Value</td></tr>
+                    }
+                    @if (inventory?.CustomInt2Enabled == true) {
+                        <tr><th>@inventory.CustomInt2Name</th><td>@Model.CustomInt2Value</td></tr>
+                    }
+                    @if (inventory?.CustomInt3Enabled == true) {
+                        <tr><th>@inventory.CustomInt3Name</th><td>@Model.CustomInt3Value</td></tr>
+                    }
+                    @if (inventory?.CustomLink1Enabled == true) {
+                        <tr><th>@inventory.CustomLink1Name</th><td><a href="@Model.CustomLink1Value" target="_blank"><i class="bi bi-box-arrow-up-right me-1"></i>@Model.CustomLink1Value</a></td></tr>
+                    }
+                    @if (inventory?.CustomLink2Enabled == true) {
+                        <tr><th>@inventory.CustomLink2Name</th><td><a href="@Model.CustomLink2Value" target="_blank"><i class="bi bi-box-arrow-up-right me-1"></i>@Model.CustomLink2Value</a></td></tr>
+                    }
+                    @if (inventory?.CustomLink3Enabled == true) {
+                        <tr><th>@inventory.CustomLink3Name</th><td><a href="@Model.CustomLink3Value" target="_blank"><i class="bi bi-box-arrow-up-right me-1"></i>@Model.CustomLink3Value</a></td></tr>
+                    }
+                    @if (inventory?.CustomBool1Enabled == true) {
+                        <tr><th>@inventory.CustomBool1Name</th><td>@(Model.CustomBool1Value == true ? "Yes" : "No")</td></tr>
+                    }
+                    @if (inventory?.CustomBool2Enabled == true) {
+                        <tr><th>@inventory.CustomBool2Name</th><td>@(Model.CustomBool2Value == true ? "Yes" : "No")</td></tr>
+                    }
+                    @if (inventory?.CustomBool3Enabled == true) {
+                        <tr><th>@inventory.CustomBool3Name</th><td>@(Model.CustomBool3Value == true ? "Yes" : "No")</td></tr>
+                    }
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-body text-center py-4">
+                <button id="likeBtn" class="btn @(Model.IsLikedByCurrentUser ? "btn-danger" : "btn-ghost") btn-lg"
+                        @(isAuthenticated ? "" : "disabled")>
+                    <i class="bi bi-heart-fill me-1"></i> <span id="likeCount">@Model.LikeCount</span>
+                </button>
+                @if (!isAuthenticated)
+                {
+                    <p class="text-muted small mt-2 mb-0">Sign in to like</p>
+                }
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header"><i class="bi bi-chat-dots me-1"></i> Comments</div>
+            <div class="card-body">
+                <div id="commentsContainer"></div>
+                @if (isAuthenticated)
+                {
+                    <div class="mt-3 pt-3 border-top">
+                        <textarea id="commentInput" class="form-control mb-2" rows="2" placeholder="Add a comment..."></textarea>
+                        <button id="addCommentBtn" class="btn btn-primary btn-sm">
+                            <i class="bi bi-send me-1"></i> Post
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const itemId = @Model.Id;
+
+        // Like toggle
+        $('#likeBtn').on('click', function () {
+            $.ajax({
+                url: '/api/likes/toggle',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ itemId: itemId }),
+                success: function (res) {
+                    $('#likeCount').text(res.count);
+                    $('#likeBtn').toggleClass('btn-danger btn-ghost');
+                }
+            });
+        });
+
+        // Load comments
+        function loadComments() {
+            $.get('/api/comments/' + itemId, function (data) {
+                let html = '';
+                data.forEach(c => {
+                    html += `<div class="comment-item">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="user-avatar" style="width:1.5rem;height:1.5rem;font-size:0.6rem;">${(c.authorName || 'U')[0]}</span>
+                            <strong class="small">${c.authorName || 'User'}</strong>
+                            <small class="text-muted">${new Date(c.createdAt).toLocaleString()}</small>
+                        </div>
+                        <p class="mb-0 small">${c.content}</p>
+                    </div>`;
+                });
+                $('#commentsContainer').html(html || '<p class="text-muted small">No comments yet.</p>');
+            });
+        }
+        loadComments();
+
+        // Add comment
+        $('#addCommentBtn').on('click', function () {
+            const content = $('#commentInput').val().trim();
+            if (!content) return;
+            $.ajax({
+                url: '/api/comments',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ content: content, itemId: itemId }),
+                success: function () {
+                    $('#commentInput').val('');
+                    loadComments();
+                }
+            });
+        });
+    </script>
+}

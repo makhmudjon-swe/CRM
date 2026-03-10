@@ -1,0 +1,143 @@
+@using InventoryManagementService.Application.DTOs
+@model InventoryDto
+@{
+    ViewData["Title"] = Model.Name;
+    var canEdit = (bool)(ViewBag.CanEdit ?? false);
+    var canWriteItems = (bool)(ViewBag.CanWriteItems ?? false);
+    var items = ViewBag.Items as IEnumerable<ItemDto> ?? Enumerable.Empty<ItemDto>();
+}
+
+<div class="page-header">
+    <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <h2 class="page-title">@Model.Name</h2>
+            @if (Model.IsPublic)
+            {
+                <span class="badge badge-soft-success">Public</span>
+            }
+        </div>
+        <div class="meta-line">
+            <span class="badge badge-soft-info">@Model.CategoryName</span>
+            <span class="meta-sep">&middot;</span>
+            <span>by @Model.OwnerName</span>
+            <span class="meta-sep">&middot;</span>
+            <span>@Model.ItemCount items</span>
+            <span class="meta-sep">&middot;</span>
+            <span>Created @Model.CreatedAt.ToString("MMM dd, yyyy")</span>
+        </div>
+        @if (Model.Tags.Any())
+        {
+            <div class="mt-2">
+                @foreach (var tag in Model.Tags)
+                {
+                    <span class="badge badge-soft-secondary me-1">@tag</span>
+                }
+            </div>
+        }
+    </div>
+    <div class="action-buttons">
+        @if (canEdit)
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-ghost btn-sm">
+                <i class="bi bi-pencil me-1"></i> Edit
+            </a>
+        }
+        @if (canWriteItems)
+        {
+            <a asp-controller="Item" asp-action="Create" asp-route-inventoryId="@Model.Id" class="btn btn-primary btn-sm">
+                <i class="bi bi-plus-circle me-1"></i> Add Item
+            </a>
+        }
+        @if (canEdit)
+        {
+            <form asp-action="Delete" method="post" class="d-inline"
+                  onsubmit="return confirm('Delete this inventory and all its items?')">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn btn-ghost-danger btn-sm">
+                    <i class="bi bi-trash me-1"></i> Delete
+                </button>
+            </form>
+        }
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.Description))
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            @Html.Raw(Markdig.Markdown.ToHtml(Model.Description))
+        </div>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ImageUrl))
+{
+    <div class="mb-4">
+        <img src="@Model.ImageUrl" alt="@Model.Name" class="img-fluid" style="max-height:300px; border-radius: var(--radius-lg);" />
+    </div>
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h4 class="mb-0"><i class="bi bi-list-ul me-2"></i>Items (@items.Count())</h4>
+</div>
+
+@if (items.Any())
+{
+    <div class="table-container">
+        <table class="table table-hover table-sm mb-0">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    @if (!string.IsNullOrEmpty(Model.CustomString1Name) && Model.CustomString1Enabled) { <th>@Model.CustomString1Name</th> }
+                    @if (!string.IsNullOrEmpty(Model.CustomString2Name) && Model.CustomString2Enabled) { <th>@Model.CustomString2Name</th> }
+                    @if (!string.IsNullOrEmpty(Model.CustomString3Name) && Model.CustomString3Enabled) { <th>@Model.CustomString3Name</th> }
+                    @if (!string.IsNullOrEmpty(Model.CustomInt1Name) && Model.CustomInt1Enabled) { <th>@Model.CustomInt1Name</th> }
+                    @if (!string.IsNullOrEmpty(Model.CustomInt2Name) && Model.CustomInt2Enabled) { <th>@Model.CustomInt2Name</th> }
+                    @if (!string.IsNullOrEmpty(Model.CustomInt3Name) && Model.CustomInt3Enabled) { <th>@Model.CustomInt3Name</th> }
+                    @if (!string.IsNullOrEmpty(Model.CustomBool1Name) && Model.CustomBool1Enabled) { <th>@Model.CustomBool1Name</th> }
+                    @if (!string.IsNullOrEmpty(Model.CustomBool2Name) && Model.CustomBool2Enabled) { <th>@Model.CustomBool2Name</th> }
+                    @if (!string.IsNullOrEmpty(Model.CustomBool3Name) && Model.CustomBool3Enabled) { <th>@Model.CustomBool3Name</th> }
+                    <th>Likes</th>
+                    <th>ID</th>
+                </tr>
+            </thead>
+            <tbody class="stagger-in">
+                @foreach (var item in items)
+                {
+                    <tr class="cursor-pointer" onclick="window.location='@Url.Action("Details", "Item", new { id = item.Id })'">
+                        <td><strong>@item.Name</strong></td>
+                        @if (Model.CustomString1Enabled) { <td>@item.CustomString1Value</td> }
+                        @if (Model.CustomString2Enabled) { <td>@item.CustomString2Value</td> }
+                        @if (Model.CustomString3Enabled) { <td>@item.CustomString3Value</td> }
+                        @if (Model.CustomInt1Enabled) { <td>@item.CustomInt1Value</td> }
+                        @if (Model.CustomInt2Enabled) { <td>@item.CustomInt2Value</td> }
+                        @if (Model.CustomInt3Enabled) { <td>@item.CustomInt3Value</td> }
+                        @if (Model.CustomBool1Enabled) { <td>@(item.CustomBool1Value == true ? "Yes" : item.CustomBool1Value == false ? "No" : "")</td> }
+                        @if (Model.CustomBool2Enabled) { <td>@(item.CustomBool2Value == true ? "Yes" : item.CustomBool2Value == false ? "No" : "")</td> }
+                        @if (Model.CustomBool3Enabled) { <td>@(item.CustomBool3Value == true ? "Yes" : item.CustomBool3Value == false ? "No" : "")</td> }
+                        <td><span class="badge badge-soft-danger"><i class="bi bi-heart-fill me-1"></i>@item.LikeCount</span></td>
+                        <td><code>@item.CustomId</code></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <h5>No items yet</h5>
+        @if (canWriteItems)
+        {
+            <p>Add the first item to this inventory.</p>
+            <a asp-controller="Item" asp-action="Create" asp-route-inventoryId="@Model.Id" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i> Add Item
+            </a>
+        }
+        else
+        {
+            <p>This inventory doesn't have any items yet.</p>
+        }
+    </div>
+}
