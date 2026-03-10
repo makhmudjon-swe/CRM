@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// Authentication (Google + Facebook)
+// Authentication (Google + Facebook) – secretlarni env var dan oling
 builder.Services.AddAuthentication()
     .AddGoogle(options =>
     {
@@ -34,25 +34,33 @@ builder.Services.AddSignalR();
 
 var app = builder.Build();
 
-// Auto-migrate and seed in development
-if (app.Environment.IsDevelopment())
+// Production modda exception handler
+if (!app.Environment.IsDevelopment())
 {
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+else
+{
+    // Development modda auto-migrate va seed
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await db.Database.MigrateAsync();
     await DbInitializer.SeedAsync(app.Services);
 }
-else
+
+// Production modda ham auto-migrate qilish (Render’da kerak)
+if (app.Environment.IsProduction())
 {
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();  // migrations ni avto qo‘llash
 }
 
+// Boshqa middleware’lar
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
