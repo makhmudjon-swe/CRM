@@ -48,7 +48,7 @@ using (var scope = app.Services.CreateScope())
     await DbInitializer.SeedAsync(app.Services);
 }
 
-// Production muhit uchun exception handling va HSTS
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
