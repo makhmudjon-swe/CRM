@@ -1,7 +1,7 @@
-using System.Linq.Expressions;
 using InventoryManagementService.Domain.Interfaces;
 using InventoryManagementService.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace InventoryManagementService.Infrastructure.Repositories;
 
