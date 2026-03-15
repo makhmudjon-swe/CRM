@@ -3,7 +3,8 @@ using InventoryManagementService.Infrastructure;
 using InventoryManagementService.Infrastructure.Data;
 using InventoryManagementService.Web.Hubs;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.HttpOverrides; // 1. Buni qo'shdik
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.DataProtection; // 1. Buni qo'shdik
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// 2. Proxy serverlar orqali HTTPS ni aniqlash uchun sozlama
+// 2. Data Protection - Shifrlash kalitlarini fayl tizimida saqlash (Muhim!)
+// Bu orqali "Antiforgery token could not be decrypted" xatosi hal bo'ladi
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(@"/app/keys"));
+
+// 3. Proxy serverlar orqali HTTPS ni to'g'ri aniqlash
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -19,12 +25,16 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
-// Authentication (Google)
+// 4. Authentication (Google)
 builder.Services.AddAuthentication()
     .AddGoogle(options =>
     {
-        options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+        // Render'dagi "Authentication__Google__ClientId" ni o'qish uchun:
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ??
+                           builder.Configuration["Authentication__Google__ClientId"]!;
+
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ??
+                               builder.Configuration["Authentication__Google__ClientSecret"]!;
     });
 
 // Cookie sozlamalari
@@ -32,15 +42,15 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // HTTPS majburiy
 });
 
-// Controllers + Views + SignalR
 builder.Services.AddControllersWithViews();
 builder.Services.AddSignalR();
 
 var app = builder.Build();
 
-// 3. Forwarded Headers ni middleware sifatida qo'shish (ENG MUHIMI)
+// 5. Forwarded Headers ni eng tepada ishlatish
 app.UseForwardedHeaders();
 
 using (var scope = app.Services.CreateScope())
