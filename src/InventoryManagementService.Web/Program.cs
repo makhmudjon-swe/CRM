@@ -1,7 +1,6 @@
 using InventoryManagementService.Application;
 using InventoryManagementService.Infrastructure;
 using InventoryManagementService.Infrastructure.Data;
-//using InventoryManagementService.Web.Hubs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.DataProtection; // 1. Buni qo'shdik
@@ -76,6 +75,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-//app.MapHub<CommentHub>("/hubs/comments");
+
 
 app.Run();
