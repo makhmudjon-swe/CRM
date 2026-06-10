@@ -1,32 +1,24 @@
-using InventoryManagementService.Domain.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using WholesaleCRM.Domain.Entities;
 
-namespace InventoryManagementService.Infrastructure.Data;
+namespace WholesaleCRM.Infrastructure.Data;
 
-public class AppDbContext : IdentityDbContext<ApplicationUser>
+public class AppDbContext : IdentityDbContext<AppUser>
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
-    public DbSet<Inventory> Inventories => Set<Inventory>();
-    public DbSet<Item> Items => Set<Item>();
-    public DbSet<Category> Categories => Set<Category>();
-    public DbSet<Tag> Tags => Set<Tag>();
-    public DbSet<InventoryTag> InventoryTags => Set<InventoryTag>();
-    public DbSet<Comment> Comments => Set<Comment>();
-    public DbSet<Like> Likes => Set<Like>();
-    public DbSet<InventoryAccess> InventoryAccesses => Set<InventoryAccess>();
-    public DbSet<CustomIdFormat> CustomIdFormats => Set<CustomIdFormat>();
-    public DbSet<CustomIdElement> CustomIdElements => Set<CustomIdElement>();
+    public DbSet<Customer> Customers => Set<Customer>();
+    public DbSet<Contact> Contacts => Set<Contact>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
+    public DbSet<Deal> Deals => Set<Deal>();
+    public DbSet<DealProduct> DealProducts => Set<DealProduct>();
+    public DbSet<Activity> Activities => Set<Activity>();
 
-    protected override void OnModelCreating(ModelBuilder builder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(builder);
-
-        builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
-
-        // Concurrency token via xmin system column
-        builder.Entity<Inventory>().Property<uint>("xmin").IsRowVersion();
-        builder.Entity<Item>().Property<uint>("xmin").IsRowVersion();
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 }

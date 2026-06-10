@@ -1,140 +1,79 @@
-using System.Security.Claims;
-using InventoryManagementService.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using WholesaleCRM.Domain.Entities;
+using WholesaleCRM.Web.Models;
 
-namespace InventoryManagementService.Web.Controllers;
+namespace WholesaleCRM.Web.Controllers;
 
 public class AccountController : Controller
 {
-    private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<AppUser> _signIn;
+    private readonly UserManager<AppUser> _userManager;
 
-    public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager)
+    public AccountController(SignInManager<AppUser> signIn, UserManager<AppUser> userManager)
     {
-        _signInManager = signInManager;
+        _signIn = signIn;
         _userManager = userManager;
     }
 
     [HttpGet]
     public IActionResult Login(string? returnUrl = null)
     {
-        ViewData["ReturnUrl"] = returnUrl;
+        if (_signIn.IsSignedIn(User)) return RedirectToAction("Index", "Home");
+        ViewBag.ReturnUrl = returnUrl;
         return View();
     }
 
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(string email, string password, string? returnUrl = null)
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
     {
-        returnUrl ??= Url.Content("~/");
+        if (!ModelState.IsValid) return View(model);
 
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-        {
-            TempData["Error"] = "Email and password are required.";
-            return RedirectToAction(nameof(Login), new { returnUrl });
-        }
-
-        var user = await _userManager.FindByEmailAsync(email);
-        if (user == null)
-        {
-            TempData["Error"] = "Invalid email or password.";
-            return RedirectToAction(nameof(Login), new { returnUrl });
-        }
-
-        if (user.IsBlocked)
-        {
-            TempData["Error"] = "Your account has been blocked.";
-            return RedirectToAction(nameof(Login), new { returnUrl });
-        }
-
-        var result = await _signInManager.PasswordSignInAsync(user, password, isPersistent: true, lockoutOnFailure: false);
+        var result = await _signIn.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
         if (result.Succeeded)
         {
-            user.LastLoginAt = DateTime.UtcNow;
-            await _userManager.UpdateAsync(user);
-            return LocalRedirect(returnUrl);
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+            return RedirectToAction("Index", "Home");
         }
-
-        TempData["Error"] = "Invalid email or password.";
-        return RedirectToAction(nameof(Login), new { returnUrl });
-    }
-
-    [HttpPost]
-    public IActionResult ExternalLogin(string provider, string? returnUrl = null)
-    {
-        var redirectUrl = Url.Action(nameof(ExternalLoginCallback), "Account", new { returnUrl });
-        var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-        return Challenge(properties, provider);
+        ModelState.AddModelError(string.Empty, "Email yoki parol noto'g'ri.");
+        return View(model);
     }
 
     [HttpGet]
-    public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null, string? remoteError = null)
+    public IActionResult Register()
     {
-        returnUrl ??= Url.Content("~/");
+        if (_signIn.IsSignedIn(User)) return RedirectToAction("Index", "Home");
+        return View();
+    }
 
-        if (remoteError != null)
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Register(RegisterViewModel model)
+    {
+        if (!ModelState.IsValid) return View(model);
+
+        var user = new AppUser
         {
-            TempData["Error"] = $"Error from external provider: {remoteError}";
-            return RedirectToAction(nameof(Login));
-        }
-
-        var info = await _signInManager.GetExternalLoginInfoAsync();
-        if (info == null)
-        {
-            return RedirectToAction(nameof(Login));
-        }
-
-        var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true);
+            UserName = model.Email,
+            Email = model.Email,
+            FullName = model.FullName,
+            EmailConfirmed = true
+        };
+        var result = await _userManager.CreateAsync(user, model.Password);
         if (result.Succeeded)
         {
-            var existingUser = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
-            if (existingUser != null)
-            {
-                existingUser.LastLoginAt = DateTime.UtcNow;
-                await _userManager.UpdateAsync(existingUser);
-            }
-            return LocalRedirect(returnUrl);
+            await _signIn.SignInAsync(user, false);
+            return RedirectToAction("Index", "Home");
         }
-
-        var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-        var name = info.Principal.FindFirstValue(ClaimTypes.Name);
-
-        var user = new ApplicationUser
-        {
-            UserName = email,
-            Email = email,
-            DisplayName = name,
-            CreatedAt = DateTime.UtcNow,
-            LastLoginAt = DateTime.UtcNow
-        };
-
-        var createResult = await _userManager.CreateAsync(user);
-        if (createResult.Succeeded)
-        {
-            await _userManager.AddToRoleAsync(user, "User");
-            await _userManager.AddLoginAsync(user, info);
-            await _signInManager.SignInAsync(user, isPersistent: true);
-            return LocalRedirect(returnUrl);
-        }
-
-        foreach (var error in createResult.Errors)
-        {
+        foreach (var error in result.Errors)
             ModelState.AddModelError(string.Empty, error.Description);
-        }
-
-        return RedirectToAction(nameof(Login));
+        return View(model);
     }
 
-    [HttpPost]
+    [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout()
     {
-        await _signInManager.SignOutAsync();
-        return RedirectToAction("Index", "Home");
-    }
-
-    public IActionResult AccessDenied()
-    {
-        return View();
+        await _signIn.SignOutAsync();
+        return RedirectToAction(nameof(Login));
     }
 }

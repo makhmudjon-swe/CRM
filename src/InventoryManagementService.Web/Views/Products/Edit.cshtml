@@ -1,0 +1,62 @@
+@model ProductRequest
+@{
+    ViewData["Title"] = "Mahsulotni tahrirlash";
+    int productId = ViewBag.ProductId;
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-7">
+        <div class="card">
+            <div class="card-header py-3"><i class="fas fa-pen text-primary me-2"></i>Mahsulotni tahrirlash</div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" asp-route-id="@productId" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger small"></div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="Name" class="form-label">Mahsulot nomi *</label>
+                            <input asp-for="Name" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="SKU" class="form-label">SKU kodi</label>
+                            <input asp-for="SKU" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ProductCategoryId" class="form-label">Kategoriya *</label>
+                            <select asp-for="ProductCategoryId" asp-items="ViewBag.Categories" class="form-select">
+                                <option value="">— Tanlang —</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="UnitPrice" class="form-label">Narx (so'm) *</label>
+                            <input asp-for="UnitPrice" class="form-control" type="number" min="1" step="500" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="StockQuantity" class="form-label">Ombordagi miqdor</label>
+                            <input asp-for="StockQuantity" class="form-control" type="number" min="0" />
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Description" class="form-label">Tavsif</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input asp-for="IsActive" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsActive" class="form-check-label">Faol mahsulot</label>
+                            </div>
+                        </div>
+                    </div>
+                    <hr class="my-4" />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-2"></i>Saqlash</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Bekor qilish</a>
+                        <form asp-action="Delete" asp-route-id="@productId" method="post" class="ms-auto"
+                              onsubmit="return confirm('Mahsulotni o\'chirmoqchimisiz?')">
+                            <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash me-1"></i>O'chirish</button>
+                        </form>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

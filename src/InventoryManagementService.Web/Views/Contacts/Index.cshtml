@@ -1,0 +1,62 @@
+@model IEnumerable<ContactDto>
+@{
+    ViewData["Title"] = "Kontaktlar";
+}
+
+<div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+        <h5 class="mb-0 fw-bold">Kontaktlar</h5>
+        <p class="text-muted small mb-0">Barcha mijoz kontaktlari</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Yangi kontakt</a>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">Ism-familiya</th>
+                    <th>Kompaniya</th>
+                    <th>Lavozim</th>
+                    <th>Email</th>
+                    <th>Telefon</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td class="ps-3">
+                            <span class="fw-semibold">@c.FullName</span>
+                            @if (c.IsPrimary) { <span class="badge bg-primary ms-1" style="font-size:0.65rem;">Asosiy</span> }
+                        </td>
+                        <td>
+                            <a asp-controller="Customers" asp-action="Details" asp-route-id="@c.CustomerId"
+                               class="text-decoration-none text-muted small">@c.CustomerName</a>
+                        </td>
+                        <td><span class="text-muted small">@(c.Position ?? "—")</span></td>
+                        <td><span class="small">@(c.Email ?? "—")</span></td>
+                        <td><span class="small">@(c.Phone ?? "—")</span></td>
+                        <td>
+                            <div class="d-flex gap-1 justify-content-end pe-2">
+                                <a asp-action="Edit" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-pen"></i>
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@c.Id" asp-route-customerId="@c.CustomerId"
+                                      method="post" onsubmit="return confirm('O\'chirilsinmi?')">
+                                    <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" class="text-center py-5 text-muted">Kontaktlar topilmadi</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

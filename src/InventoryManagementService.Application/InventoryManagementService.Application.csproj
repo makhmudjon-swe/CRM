@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\InventoryManagementService.Domain\InventoryManagementService.Domain.csproj" />
+    <ProjectReference Include="..\WholesaleCRM.Domain\InventoryManagementService.Domain.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,25 +1,19 @@
-using InventoryManagementService.Application.Interfaces;
-using InventoryManagementService.Application.Services;
 using Microsoft.Extensions.DependencyInjection;
+using WholesaleCRM.Application.Interfaces;
+using WholesaleCRM.Application.Services;
 
-namespace InventoryManagementService.Application;
+namespace WholesaleCRM.Application;
 
 public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddAutoMapper(typeof(DependencyInjection).Assembly);
-
-        services.AddScoped<IInventoryService, InventoryService>();
-        services.AddScoped<IItemService, ItemService>();
-        services.AddScoped<ICategoryService, CategoryService>();
-        services.AddScoped<ITagService, TagService>();
-        services.AddScoped<ICommentService, CommentService>();
-        services.AddScoped<ILikeService, LikeService>();
-        services.AddScoped<IInventoryAuthorizationService, InventoryAuthorizationService>();
-        services.AddScoped<ICustomIdService, CustomIdService>();
-        services.AddScoped<IInventoryAccessService, InventoryAccessService>();
-
+        services.AddScoped<ICustomerService, CustomerService>();
+        services.AddScoped<IContactService, ContactService>();
+        services.AddScoped<IProductService, ProductService>();
+        services.AddScoped<IDealService, DealService>();
+        services.AddScoped<IActivityService, ActivityService>();
+        services.AddScoped<IDashboardService, DashboardService>();
         return services;
     }
 }

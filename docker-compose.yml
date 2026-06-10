@@ -1,0 +1,54 @@
+﻿version: '3.8'
+
+services:
+  # =====================================
+  # ASP.NET Core Ilovasi
+  # =====================================
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: crm_web
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=WholesaleCRM;Username=postgres;Password=\
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - crm_network
+
+  # =====================================
+  # PostgreSQL Ma'lumotlar Bazasi
+  # =====================================
+  db:
+    image: postgres:15-alpine
+    container_name: crm_postgres
+    environment:
+      POSTGRES_DB: WholesaleCRM
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: \
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d WholesaleCRM"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - crm_network
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  crm_network:
+    driver: bridge

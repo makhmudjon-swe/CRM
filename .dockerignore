@@ -1,0 +1,26 @@
+# .NET build artifacts
+**/bin/
+**/obj/
+
+# Visual Studio files
+**/.vs/
+**/*.user
+**/*.suo
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Test results
+**/TestResults/
+
+# IDE configs
+.vscode/
+.idea/
+.claude/

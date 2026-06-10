@@ -1,0 +1,70 @@
+@model IEnumerable<ActivityDto>
+@{
+    ViewData["Title"] = "Faoliyatlar";
+}
+
+<div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+        <h5 class="mb-0 fw-bold">Faoliyatlar jurnali</h5>
+        <p class="text-muted small mb-0">Barcha mijoz bilan aloqalar tarixi</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Yangi faoliyat</a>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">Tur</th>
+                    <th>Mavzu</th>
+                    <th>Mijoz</th>
+                    <th>Mas'ul</th>
+                    <th>Sana</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model)
+                {
+                    <tr>
+                        <td class="ps-3">
+                            <span class="badge bg-light text-dark border">
+                                <i class="fas @a.TypeIcon me-1 text-primary"></i>@a.Type
+                            </span>
+                        </td>
+                        <td>
+                            <span class="fw-semibold small">@a.Subject</span>
+                            @if (!string.IsNullOrEmpty(a.Notes))
+                            {
+                                <div class="text-muted" style="font-size:0.78rem;" title="@a.Notes">
+                                    @(a.Notes.Length > 60 ? a.Notes[..60] + "..." : a.Notes)
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            @if (a.CustomerId.HasValue)
+                            {
+                                <a asp-controller="Customers" asp-action="Details" asp-route-id="@a.CustomerId"
+                                   class="text-decoration-none text-muted small">@a.CustomerName</a>
+                            }
+                        </td>
+                        <td><span class="text-muted small">@(a.UserName ?? "—")</span></td>
+                        <td><span class="small">@a.ActivityDate.ToString("dd.MM.yyyy")</span></td>
+                        <td>
+                            <form asp-action="Delete" asp-route-id="@a.Id"
+                                  asp-route-customerId="@a.CustomerId" method="post"
+                                  onsubmit="return confirm('O\'chirilsinmi?')">
+                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr><td colspan="6" class="text-center py-5 text-muted">Faoliyatlar topilmadi</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

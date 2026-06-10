@@ -1,0 +1,94 @@
+@model IEnumerable<CustomerDto>
+@{
+    ViewData["Title"] = "Mijozlar";
+}
+
+<div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+        <h5 class="mb-0 fw-bold">Mijozlar</h5>
+        <p class="text-muted small mb-0">Barcha kompaniya mijozlari ro'yxati</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Yangi mijoz</a>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body p-3">
+        <form method="get" class="d-flex gap-2 mb-3">
+            <div class="search-box flex-grow-1">
+                <i class="fas fa-search"></i>
+                <input name="search" value="@ViewBag.Search" class="form-control"
+                       placeholder="Kompaniya nomi, shahar yoki email bo'yicha qidirish..." />
+            </div>
+            <button type="submit" class="btn btn-outline-primary px-4">Qidirish</button>
+            @if (!string.IsNullOrEmpty(ViewBag.Search as string))
+            {
+                <a asp-action="Index" class="btn btn-outline-secondary">Tozalash</a>
+            }
+        </form>
+
+        <table class="table table-hover align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-3">Kompaniya</th>
+                    <th>Soha</th>
+                    <th>Shahar</th>
+                    <th>Telefon</th>
+                    <th>Holat</th>
+                    <th>Bitimlar</th>
+                    <th>Daromad</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td class="ps-3">
+                            <a asp-action="Details" asp-route-id="@c.Id"
+                               class="text-decoration-none fw-semibold text-dark">@c.CompanyName</a>
+                            @if (!string.IsNullOrEmpty(c.Email))
+                            {
+                                <div class="text-muted small">@c.Email</div>
+                            }
+                        </td>
+                        <td><span class="text-muted small">@(c.Industry ?? "—")</span></td>
+                        <td><span class="text-muted small">@(c.City ?? "—")</span></td>
+                        <td><span class="small">@(c.Phone ?? "—")</span></td>
+                        <td>
+                            <span class="badge bg-@(WholesaleCRM.Application.EnumHelper.GetCustomerStatusBadge(c.StatusValue))">
+                                @c.Status
+                            </span>
+                        </td>
+                        <td><span class="badge bg-secondary">@c.DealCount ta</span></td>
+                        <td class="fw-semibold text-success small">@(c.TotalRevenue.ToString("N0"))</td>
+                        <td>
+                            <div class="d-flex gap-1 justify-content-end">
+                                <a asp-action="Details" asp-route-id="@c.Id" class="btn btn-sm btn-outline-primary" title="Ko'rish">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary" title="Tahrirlash">
+                                    <i class="fas fa-pen"></i>
+                                </a>
+                                <form asp-action="Delete" asp-route-id="@c.Id" method="post"
+                                      onsubmit="return confirm('Mijozni o\'chirmoqchimisiz?')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="O'chirish">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-muted">
+                            <i class="fas fa-building fa-2x mb-2 d-block opacity-25"></i>
+                            Mijozlar topilmadi
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

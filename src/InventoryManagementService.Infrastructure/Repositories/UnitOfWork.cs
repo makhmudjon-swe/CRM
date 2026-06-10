@@ -1,39 +1,30 @@
-using InventoryManagementService.Domain.Entities;
-using InventoryManagementService.Domain.Interfaces;
-using InventoryManagementService.Infrastructure.Data;
+using WholesaleCRM.Domain.Entities;
+using WholesaleCRM.Domain.Interfaces;
+using WholesaleCRM.Infrastructure.Data;
 
-namespace InventoryManagementService.Infrastructure.Repositories;
+namespace WholesaleCRM.Infrastructure.Repositories;
 
 public class UnitOfWork : IUnitOfWork
 {
     private readonly AppDbContext _context;
 
-    private IRepository<Inventory>? _inventories;
-    private IRepository<Item>? _items;
-    private IRepository<Category>? _categories;
-    private IRepository<Tag>? _tags;
-    private IRepository<InventoryTag>? _inventoryTags;
-    private IRepository<Comment>? _comments;
-    private IRepository<Like>? _likes;
-    private IRepository<InventoryAccess>? _inventoryAccesses;
-    private IRepository<CustomIdFormat>? _customIdFormats;
-    private IRepository<CustomIdElement>? _customIdElements;
+    private IRepository<Customer>? _customers;
+    private IRepository<Contact>? _contacts;
+    private IRepository<Product>? _products;
+    private IRepository<ProductCategory>? _productCategories;
+    private IRepository<Deal>? _deals;
+    private IRepository<DealProduct>? _dealProducts;
+    private IRepository<Activity>? _activities;
 
-    public UnitOfWork(AppDbContext context)
-    {
-        _context = context;
-    }
+    public UnitOfWork(AppDbContext context) => _context = context;
 
-    public IRepository<Inventory> Inventories => _inventories ??= new Repository<Inventory>(_context);
-    public IRepository<Item> Items => _items ??= new Repository<Item>(_context);
-    public IRepository<Category> Categories => _categories ??= new Repository<Category>(_context);
-    public IRepository<Tag> Tags => _tags ??= new Repository<Tag>(_context);
-    public IRepository<InventoryTag> InventoryTags => _inventoryTags ??= new Repository<InventoryTag>(_context);
-    public IRepository<Comment> Comments => _comments ??= new Repository<Comment>(_context);
-    public IRepository<Like> Likes => _likes ??= new Repository<Like>(_context);
-    public IRepository<InventoryAccess> InventoryAccesses => _inventoryAccesses ??= new Repository<InventoryAccess>(_context);
-    public IRepository<CustomIdFormat> CustomIdFormats => _customIdFormats ??= new Repository<CustomIdFormat>(_context);
-    public IRepository<CustomIdElement> CustomIdElements => _customIdElements ??= new Repository<CustomIdElement>(_context);
+    public IRepository<Customer> Customers => _customers ??= new Repository<Customer>(_context);
+    public IRepository<Contact> Contacts => _contacts ??= new Repository<Contact>(_context);
+    public IRepository<Product> Products => _products ??= new Repository<Product>(_context);
+    public IRepository<ProductCategory> ProductCategories => _productCategories ??= new Repository<ProductCategory>(_context);
+    public IRepository<Deal> Deals => _deals ??= new Repository<Deal>(_context);
+    public IRepository<DealProduct> DealProducts => _dealProducts ??= new Repository<DealProduct>(_context);
+    public IRepository<Activity> Activities => _activities ??= new Repository<Activity>(_context);
 
     public async Task<int> SaveChangesAsync() => await _context.SaveChangesAsync();
 

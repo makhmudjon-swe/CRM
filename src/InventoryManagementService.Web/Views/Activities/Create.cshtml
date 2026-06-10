@@ -1,0 +1,64 @@
+@model ActivityRequest
+@{
+    ViewData["Title"] = "Yangi faoliyat";
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-7">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb small">
+                <li class="breadcrumb-item"><a asp-action="Index">Faoliyatlar</a></li>
+                <li class="breadcrumb-item active">Yangi faoliyat</li>
+            </ol>
+        </nav>
+        <div class="card">
+            <div class="card-header py-3"><i class="fas fa-plus-circle text-primary me-2"></i>Faoliyat qo'shish</div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger small"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="Type" class="form-label">Faoliyat turi *</label>
+                            <select asp-for="Type" asp-items="ViewBag.Types" class="form-select">
+                                <option value="">— Tanlang —</option>
+                            </select>
+                            <span asp-validation-for="Type" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ActivityDate" class="form-label">Sana *</label>
+                            <input asp-for="ActivityDate" class="form-control" type="datetime-local" />
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Subject" class="form-label">Mavzu *</label>
+                            <input asp-for="Subject" class="form-control" placeholder="Faoliyat mavzusi" />
+                            <span asp-validation-for="Subject" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CustomerId" class="form-label">Mijoz</label>
+                            <select asp-for="CustomerId" asp-items="ViewBag.Customers" class="form-select">
+                                <option value="">— Tanlang —</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DealId" class="form-label">Bitim</label>
+                            <select asp-for="DealId" asp-items="ViewBag.Deals" class="form-select">
+                                <option value="">— Tanlang —</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Notes" class="form-label">Izohlar</label>
+                            <textarea asp-for="Notes" class="form-control" rows="4"
+                                      placeholder="Uchrashuv natijalari, muhim qaydlar..."></textarea>
+                        </div>
+                    </div>
+                    <hr class="my-4" />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-2"></i>Saqlash</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Bekor qilish</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

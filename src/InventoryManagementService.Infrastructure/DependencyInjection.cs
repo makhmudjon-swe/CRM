@@ -1,15 +1,13 @@
-using InventoryManagementService.Application.Interfaces;
-using InventoryManagementService.Domain.Entities;
-using InventoryManagementService.Domain.Interfaces;
-using InventoryManagementService.Infrastructure.Data;
-using InventoryManagementService.Infrastructure.Repositories;
-using InventoryManagementService.Infrastructure.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using WholesaleCRM.Domain.Entities;
+using WholesaleCRM.Domain.Interfaces;
+using WholesaleCRM.Infrastructure.Data;
+using WholesaleCRM.Infrastructure.Repositories;
 
-namespace InventoryManagementService.Infrastructure;
+namespace WholesaleCRM.Infrastructure;
 
 public static class DependencyInjection
 {
@@ -18,21 +16,18 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
-        services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+        services.AddIdentity<AppUser, IdentityRole>(options =>
         {
-            options.SignIn.RequireConfirmedAccount = false;
-            options.Password.RequireDigit = false;
-            options.Password.RequireLowercase = false;
+            options.Password.RequireDigit = true;
+            options.Password.RequiredLength = 6;
             options.Password.RequireNonAlphanumeric = false;
             options.Password.RequireUppercase = false;
-            options.Password.RequiredLength = 1;
+            options.SignIn.RequireConfirmedEmail = false;
         })
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<IImageService, LocalImageService>();
-
         return services;
     }
 }

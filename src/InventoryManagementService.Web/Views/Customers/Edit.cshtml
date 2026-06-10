@@ -1,0 +1,93 @@
+@model CustomerRequest
+@{
+    ViewData["Title"] = "Mijozni tahrirlash";
+    int customerId = ViewBag.CustomerId;
+}
+
+<div class="page-header">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a asp-action="Index">Mijozlar</a></li>
+            <li class="breadcrumb-item"><a asp-action="Details" asp-route-id="@customerId">@Model.CompanyName</a></li>
+            <li class="breadcrumb-item active">Tahrirlash</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-xl-8">
+        <div class="card">
+            <div class="card-header py-3">
+                <i class="fas fa-pen text-primary me-2"></i>Mijozni tahrirlash
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" asp-route-id="@customerId" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger small"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label asp-for="CompanyName" class="form-label">Kompaniya nomi *</label>
+                            <input asp-for="CompanyName" class="form-control" />
+                            <span asp-validation-for="CompanyName" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Industry" class="form-label">Soha</label>
+                            <input asp-for="Industry" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label">Email</label>
+                            <input asp-for="Email" class="form-control" type="email" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Phone" class="form-label">Telefon</label>
+                            <input asp-for="Phone" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="City" class="form-label">Shahar</label>
+                            <input asp-for="City" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Country" class="form-label">Davlat</label>
+                            <input asp-for="Country" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Status" class="form-label">Holat</label>
+                            <select asp-for="Status" class="form-select">
+                                <option value="0">Potensial</option>
+                                <option value="1">Faol</option>
+                                <option value="2">Nofaol</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="AssignedToId" class="form-label">Mas'ul xodim</label>
+                            <select asp-for="AssignedToId" class="form-select">
+                                <option value="">— Tanlang —</option>
+                                @foreach (var u in ViewBag.Users as List<WholesaleCRM.Domain.Entities.AppUser> ?? new())
+                                {
+                                    <option value="@u.Id">@u.FullName (@u.Email)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Address" class="form-label">Manzil</label>
+                            <input asp-for="Address" class="form-control" />
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Notes" class="form-label">Izohlar</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <hr class="my-4" />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="fas fa-save me-2"></i>Saqlash
+                        </button>
+                        <a asp-action="Details" asp-route-id="@customerId" class="btn btn-outline-secondary">Bekor qilish</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

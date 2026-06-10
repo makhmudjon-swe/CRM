@@ -1,9 +1,8 @@
-using InventoryManagementService.Domain.Interfaces;
-using InventoryManagementService.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
+using WholesaleCRM.Domain.Interfaces;
+using WholesaleCRM.Infrastructure.Data;
 
-namespace InventoryManagementService.Infrastructure.Repositories;
+namespace WholesaleCRM.Infrastructure.Repositories;
 
 public class Repository<T> : IRepository<T> where T : class
 {
@@ -20,9 +19,6 @@ public class Repository<T> : IRepository<T> where T : class
 
     public async Task<IEnumerable<T>> GetAllAsync() => await _dbSet.ToListAsync();
 
-    public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
-        => await _dbSet.Where(predicate).ToListAsync();
-
     public IQueryable<T> Query() => _dbSet.AsQueryable();
 
     public async Task AddAsync(T entity) => await _dbSet.AddAsync(entity);
@@ -30,6 +26,4 @@ public class Repository<T> : IRepository<T> where T : class
     public void Update(T entity) => _dbSet.Update(entity);
 
     public void Remove(T entity) => _dbSet.Remove(entity);
-
-    public void RemoveRange(IEnumerable<T> entities) => _dbSet.RemoveRange(entities);
 }

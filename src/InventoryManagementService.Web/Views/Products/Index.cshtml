@@ -1,0 +1,96 @@
+@model IEnumerable<ProductDto>
+@{
+    ViewData["Title"] = "Mahsulotlar";
+    var categories = ViewBag.Categories as IEnumerable<ProductCategoryDto> ?? Enumerable.Empty<ProductCategoryDto>();
+    int? selectedCat = ViewBag.SelectedCategory;
+}
+
+<div class="page-header d-flex align-items-center justify-content-between">
+    <div>
+        <h5 class="mb-0 fw-bold">Mahsulotlar Katalogi</h5>
+        <p class="text-muted small mb-0">Jami @Model.Count() ta mahsulot</p>
+    </div>
+    <a asp-action="Create" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Yangi mahsulot</a>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header py-3 small fw-semibold">Kategoriyalar</div>
+            <div class="list-group list-group-flush">
+                <a asp-action="Index" class="list-group-item list-group-item-action small @(selectedCat == null ? "active" : "")">
+                    Barchasi <span class="badge bg-secondary float-end">@Model.Count()</span>
+                </a>
+                @foreach (var c in categories)
+                {
+                    <a asp-action="Index" asp-route-categoryId="@c.Id"
+                       class="list-group-item list-group-item-action small @(selectedCat == c.Id ? "active" : "")">
+                        @c.Name
+                        <span class="badge bg-secondary float-end">@c.ProductCount</span>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-body p-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Mahsulot</th>
+                            <th>SKU</th>
+                            <th>Kategoriya</th>
+                            <th>Narx</th>
+                            <th>Omborda</th>
+                            <th>Holat</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model)
+                        {
+                            <tr>
+                                <td class="ps-3">
+                                    <span class="fw-semibold">@p.Name</span>
+                                    @if (!string.IsNullOrEmpty(p.Description))
+                                    {
+                                        <div class="text-muted small text-truncate" style="max-width:200px;">@p.Description</div>
+                                    }
+                                </td>
+                                <td><code class="small">@(p.SKU ?? "—")</code></td>
+                                <td><span class="badge bg-light text-dark border">@p.CategoryName</span></td>
+                                <td class="fw-bold text-success">@(p.UnitPrice.ToString("N0")) so'm</td>
+                                <td>
+                                    <span class="badge bg-@(p.StockQuantity > 100 ? "success" : p.StockQuantity > 0 ? "warning" : "danger")">
+                                        @p.StockQuantity ta
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-@(p.IsActive ? "success" : "secondary")">
+                                        @(p.IsActive ? "Faol" : "Nofaol")
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1 justify-content-end pe-2">
+                                        <a asp-action="Edit" asp-route-id="@p.Id" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        <form asp-action="Delete" asp-route-id="@p.Id" method="post"
+                                              onsubmit="return confirm('Mahsulotni o\'chirmoqchimisiz?')">
+                                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                        @if (!Model.Any())
+                        {
+                            <tr><td colspan="7" class="text-center py-5 text-muted">Mahsulotlar topilmadi</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

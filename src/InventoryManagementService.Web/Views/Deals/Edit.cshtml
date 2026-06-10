@@ -1,0 +1,62 @@
+@model DealRequest
+@{
+    ViewData["Title"] = "Bitimni tahrirlash";
+    int dealId = ViewBag.DealId;
+}
+
+<div class="row justify-content-center">
+    <div class="col-xl-8">
+        <div class="card">
+            <div class="card-header py-3"><i class="fas fa-pen text-primary me-2"></i>Bitimni tahrirlash</div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" asp-route-id="@dealId" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger small"></div>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label asp-for="Title" class="form-label">Bitim nomi *</label>
+                            <input asp-for="Title" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="CustomerId" class="form-label">Mijoz *</label>
+                            <select asp-for="CustomerId" asp-items="ViewBag.Customers" class="form-select">
+                                <option value="">— Tanlang —</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Status" class="form-label">Holat</label>
+                            <select asp-for="Status" asp-items="ViewBag.Statuses" class="form-select"></select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="TotalAmount" class="form-label">Summa (so'm)</label>
+                            <input asp-for="TotalAmount" class="form-control" type="number" min="0" step="1000" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="ExpectedCloseDate" class="form-label">Yopilish sanasi</label>
+                            <input asp-for="ExpectedCloseDate" class="form-control" type="date" />
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="AssignedToId" class="form-label">Mas'ul xodim</label>
+                            <select asp-for="AssignedToId" asp-items="ViewBag.Users" class="form-select">
+                                <option value="">— Tanlang —</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label asp-for="Notes" class="form-label">Izohlar</label>
+                            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <hr class="my-4" />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-2"></i>Saqlash</button>
+                        <a asp-action="Details" asp-route-id="@dealId" class="btn btn-outline-secondary">Bekor qilish</a>
+                        <form asp-action="Delete" asp-route-id="@dealId" method="post" class="ms-auto"
+                              onsubmit="return confirm('Bitimni o\'chirmoqchimisiz?')">
+                            <button class="btn btn-outline-danger btn-sm"><i class="fas fa-trash me-1"></i>O'chirish</button>
+                        </form>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }
